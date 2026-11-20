@@ -1,0 +1,46 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | Fantastic 5</title>
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <main>
+        <h1>Fantastic 5</h1>
+        <h2>Administrator Dashboard</h2>
+
+        <p>Logged in as {{ admin_username }}.</p>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}
+                <p class="{{ category }}">{{ message }}</p>
+            {% endfor %}
+        {% endwith %}
+
+        <h3>Registered Members</h3>
+
+        <p>{{ members|length }} of 5 members registered.</p>
+
+        {% if members %}
+            <ul>
+                {% for member in members %}
+                    <li>{{ member.name }}</li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No members registered yet.</p>
+        {% endif %}
+
+        <form method="POST"
+              action="{{ url_for('main.admin_logout') }}">
+            <input type="hidden" name="csrf_token"
+                   value="{{ csrf_token() }}">
+            <button type="submit">Admin Logout</button>
+        </form>
+    </main>
+</body>
+</html>

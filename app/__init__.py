@@ -55,4 +55,34 @@ def create_app():
         click.echo(f"Private access code: {access_code}")
         click.echo("Share this code privately. It cannot be retrieved later.")
 
+    
+    @app.cli.command("create-admin")
+    @click.argument("username")
+    def create_admin_command(username):
+        """Create the administrator account."""
+
+        from app.models import Admin
+        from app.services.admins import create_admin
+
+        if Admin.query.first():
+            click.echo("An administrator account already exists.")
+            return
+
+        password = click.prompt(
+            "Enter admin password",
+            hide_input=True,
+            confirmation_prompt=True
+        )
+
+        if len(password) < 12:
+            click.echo("Password must contain at least 12 characters.")
+            return
+
+        try:
+            create_admin(username, password)
+            click.echo(f"Administrator '{username}' created successfully.")
+        except ValueError as error:
+            click.echo(str(error))
+
+
     return app

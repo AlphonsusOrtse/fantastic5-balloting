@@ -1,4 +1,4 @@
-
+from app.services.admins import authenticate_admin
 from functools import wraps
 
 from flask import (
@@ -28,6 +28,22 @@ def member_required(view):
         return view(*args, **kwargs)
 
     return wrapped_view
+
+
+
+def admin_required(view):
+    """Protect routes so only administrators can access them."""
+
+    @wraps(view)
+    def wrapped_view(*args, **kwargs):
+        if "admin_id" not in session:
+            flash("Administrator login required.", "error")
+            return redirect(url_for("main.admin_login"))
+
+        return view(*args, **kwargs)
+
+    return wrapped_view
+
 
 
 @main.route("/")
@@ -75,3 +91,51 @@ def logout():
     session.clear()
     flash("You have been logged out.", "success")
     return redirect(url_for("main.login"))
+
+
+@main.route("/admin/login", methods=["GET", "POST"])
+def admin_login():
+    if "admin_id" in session:
+        return redirect(url_for("main.admin_dashboard"))
+
+    if request.method == "POST":
+        username = request.form.get("username", "").strip()
+        password = request.form.get("password", "")
+
+        admin = authenticate_admin(username, password)
+
+        if admin is None:
+            flash("Invalid administrator credentials.", "error")
+            return render_template("admin_login.html")
+
+        session.clear()
+        session["admin_id"] = admin.id
+        session["admin_username"] = admin.username
+
+        flash("Administrator login successful.", "success")
+        return redirect(url_for("main.admin_dashboard"))
+
+    return render_template("admin_login.html")
+
+
+@main.route("/admin")
+@admin_required
+def admin_dashboard():
+    from app.models import Member
+
+    members = Member.query.order_by(Member.id).all()
+
+    return render_template(
+        "admin_dashboard.html",
+        members=members,
+        admin_username=session.get("admin_username")
+    )
+
+
+@main.route("/admin/logout", methods=["POST"])
+@admin_required
+def admin_logout():
+    session.clear()
+    flash("Administrator logged out.", "success")
+    return redirect(url_for("main.admin_login"))
+
