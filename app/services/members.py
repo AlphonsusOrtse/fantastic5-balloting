@@ -1,7 +1,10 @@
 
 import secrets
 
-from werkzeug.security import generate_password_hash
+from werkzeug.security import (
+    generate_password_hash,
+    check_password_hash,
+)
 
 from app.extensions import db
 from app.models import Member
@@ -21,3 +24,15 @@ def create_member(name):
     db.session.commit()
 
     return member, access_code
+
+
+def authenticate_member(access_code):
+    """Return the member if the access code is valid."""
+
+    members = Member.query.all()
+
+    for member in members:
+        if check_password_hash(member.access_code_hash, access_code):
+            return member
+
+    return None

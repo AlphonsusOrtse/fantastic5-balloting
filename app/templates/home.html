@@ -1,16 +1,36 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fantastic 5 | Goal Getters</title>
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-    <h1>Fantastic 5</h1>
-    <h2>Goal Getters</h2>
+    <main>
+        <h1>Fantastic 5</h1>
+        <h2>Goal Getters</h2>
 
-    <p>Welcome to our contribution balloting system.</p>
-    <p>Five members. One fair draw.</p>
+        <p>Welcome to our contribution balloting system.</p>
+        <p>Five members. One fair draw.</p>
+
+        <h3>Welcome, {{ member_name }}!</h3>
+
+        <p>You have successfully accessed the member area.</p>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}
+                <p class="{{ category }}">{{ message }}</p>
+            {% endfor %}
+        {% endwith %}
+
+        <form method="POST" action="{{ url_for('main.logout') }}">
+            <input type="hidden" name="csrf_token"
+                   value="{{ csrf_token() }}">
+            <button type="submit">Log out</button>
+        </form>
+    </main>
 </body>
 </html>
